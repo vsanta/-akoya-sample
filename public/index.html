@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Akoya OAuth Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Akoya OAuth Demo</h1>
+    <button onclick="startAuth()" class="button">Connect to Bank</button>
+
+    <script>
+        const CLIENT_ID = process.env.CLIENT_ID;
+        const REDIRECT_URI = process.env.REDIRECT_URI;
+
+        function generateState(length = 32) {
+            const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let state = '';
+            for (let i = 0; i < length; i++) {
+                state += charset.charAt(Math.floor(Math.random() * charset.length));
+            }
+            return state;
+        }
+
+        function startAuth() {
+            // Generate random state for CSRF protection
+            const state =generateState();
+            console.log(state)
+            
+            // Store state in localStorage to verify when we return
+            localStorage.setItem('oauth_state', state);
+
+            // Construct the authorization URL
+            const authUrl = new URL('https://sandbox-idp.ddp.akoya.com/auth');
+            authUrl.searchParams.append('connector', 'mikomo');
+            authUrl.searchParams.append('response_type', 'code');
+            authUrl.searchParams.append('client_id', CLIENT_ID);
+            authUrl.searchParams.append('redirect_uri', REDIRECT_URI);
+            authUrl.searchParams.append('scope', 'openid offline_access');
+            authUrl.searchParams.append('state', state);
+
+            // Redirect to Akoya auth page
+            window.location.href = authUrl.toString();
+        }
+    </script>
+</body>
+</html>
