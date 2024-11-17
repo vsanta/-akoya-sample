@@ -39,25 +39,18 @@
         }
 
         function startAuth() {
-            // Generate random state for CSRF protection
-            const state =generateState();
-            console.log(state)
-            
-            // Store state in localStorage to verify when we return
+            const state = generateState();
             localStorage.setItem('oauth_state', state);
 
-            // Construct the authorization URL
-            const authUrl = new URL('https://sandbox-idp.ddp.akoya.com/auth');
-            authUrl.searchParams.append('connector', 'mikomo');
-            authUrl.searchParams.append('response_type', 'code');
-            authUrl.searchParams.append('client_id', CLIENT_ID);
-            authUrl.searchParams.append('redirect_uri', REDIRECT_URI);
-            authUrl.searchParams.append('scope', 'openid offline_access');
-            authUrl.searchParams.append('state', state);
-
-            // Redirect to Akoya auth page
-            window.location.href = authUrl.toString();
+            fetch(`/api/auth?state=${state}`)
+                .then(res => res.json())
+                .then(data => {
+                    window.location.href = data.url;
+                })
+                .catch(error => {
+                    console.error('Auth error:', error);
+                });
         }
-    </script>
+   </script>
 </body>
 </html>

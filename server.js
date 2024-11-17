@@ -55,6 +55,18 @@ app.get('/callback', async (req, res) => {
     }
 });
 
+app.get('/api/auth', (req, res) => {
+    const authUrl = new URL('https://sandbox-idp.ddp.akoya.com/auth');
+    authUrl.searchParams.append('connector', 'mikomo');
+    authUrl.searchParams.append('response_type', 'code');
+    authUrl.searchParams.append('client_id', process.env.CLIENT_ID);
+    authUrl.searchParams.append('redirect_uri', process.env.REDIRECT_URI);
+    authUrl.searchParams.append('scope', 'openid offline_access');
+    authUrl.searchParams.append('state', req.query.state || Math.random().toString(36).substring(7));
+    
+    res.json({ url: authUrl.toString() });
+});
+
 
 app.get('/api/proxy/*', async (req, res) => {
     try {
