@@ -25,6 +25,7 @@ For production implementations, please:
 │   └── server.test.js      # Server tests
 ├── test-config/            # Test configuration
 │   └── setup.js           # Test setup
+├── coverage/              # Test coverage reports (not in repo)
 ├── public/                # Static files
 │   ├── index.html        # OAuth flow page
 │   └── products.html     # Data display
@@ -33,6 +34,7 @@ For production implementations, please:
 ├── .env.test            # Test environment variables
 ├── .env.example         # Example environment template
 ├── jest.config.js       # Jest configuration
+├── LICENSE.md           # Project license and disclaimers
 └── package.json         # Dependencies
 ```
 
@@ -56,8 +58,8 @@ For production implementations, please:
 
 1. Clone the repository:
 ```bash
-git clone git@github.com:vsanta/akoya-sample.git
-cd akoya-sample
+git clone <repository-url>
+cd <project-directory>
 ```
 
 2. Install dependencies:
@@ -90,23 +92,73 @@ The application will be available at `http://localhost:3000`
 
 Run tests:
 ```bash
+# Run tests
 npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests in watch mode
+npm run test:watch
 ```
 
+### Coverage Reports
+- HTML report: `coverage/lcov-report/index.html`
+- Coverage thresholds:
+  - Branches: 80%
+  - Functions: 80%
+  - Lines: 80%
+  - Statements: 80%
+
 Test configuration is in:
-- `jest.config.js` - Jest settings
+- `jest.config.js` - Jest settings and coverage configuration
 - `test-config/setup.js` - Test environment setup
 - `__tests__/*.test.js` - Test files
 - `.env.test` - Test environment variables
+
+## OAuth2 Flow
+This application implements a standard OAuth2 flow:
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant Frontend
+    participant Backend
+    participant Akoya
+    participant Bank
+
+    User->>Frontend: Click "Connect to Bank"
+    Frontend->>Backend: Request auth URL via /api/auth
+    Backend->>Frontend: Return Akoya auth URL
+    Frontend->>Akoya: Redirect to auth URL
+    Akoya->>Bank: Redirect to bank authentication
+    User->>Bank: Authenticate
+    Bank->>User: Present consent screen
+    User->>Bank: Approve consent
+    Bank->>Akoya: Send approval
+    Akoya->>Backend: Redirect to callback with auth code
+    Backend->>Akoya: Exchange code for tokens
+    Akoya->>Backend: Return tokens
+    Backend->>Frontend: Redirect to products page
+    Frontend->>User: Show available products
+
+    Note over Frontend,Backend: Product API Calls
+    Frontend->>Backend: Request data via /api/proxy/*
+    Backend->>Akoya: Forward request with token
+    Akoya->>Backend: Return data
+    Backend->>Frontend: Return data
+    Frontend->>User: Display data in new window
+```
 
 ## Security Notes
 - Never commit `.env` files to the repository
 - Keep credentials secure
 - Don't expose secrets to frontend
 - Ensure Redirect URIs match exactly between app config and .env
+- All Akoya API calls should go through the proxy to avoid CORS issues
 
 ## License
 
 MIT License - Copyright (c) 2024
 
-See LICENSE file for full details.
+See LICENSE.md file for full details and disclaimers.
