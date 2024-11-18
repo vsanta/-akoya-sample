@@ -19,15 +19,30 @@ For production implementations, please:
 3. Follow your organization's standards
 4. Consider security expert consultation
 
-## Quick Start
+## Project Structure
+```
+├── __tests__/              # Test files
+│   └── server.test.js      # Server tests
+├── test-config/            # Test configuration
+│   └── setup.js           # Test setup
+├── public/                # Static files
+│   ├── index.html        # OAuth flow page
+│   └── products.html     # Data display
+├── server.js             # Express server & proxy
+├── .env                  # Environment variables (not in repo)
+├── .env.test            # Test environment variables
+├── .env.example         # Example environment template
+├── jest.config.js       # Jest configuration
+└── package.json         # Dependencies
+```
 
-### Prerequisites
+## Prerequisites
 - Node.js (v14+)
 - npm
 - Akoya Data Recipient Hub account
 - Sandbox app credentials from Akoya
 
-### Sandbox App Setup
+## Sandbox App Setup
 1. Log into the [Akoya Data Recipient Hub](https://recipient.ddp.akoya.com)
 2. Create a new Sandbox application
 3. Configure the Redirect URI in your app settings:
@@ -37,58 +52,55 @@ For production implementations, please:
    ⚠️ This must exactly match the REDIRECT_URI in your .env file
 4. Note your Client ID and Client Secret
 
-### Application Setup
+## Installation
+
+1. Clone the repository:
 ```bash
-# Install dependencies
-npm install
-
-# Setup environment
-cp .env.example .env
-
-# Add your credentials to .env
-CLIENT_ID=your_akoya_client_id
-CLIENT_SECRET=your_akoya_client_secret
-REDIRECT_URI=http://localhost:3000/callback    # Must match Sandbox app config
+git clone git@github.com:vsanta/akoya-sample.git
+cd akoya-sample
 ```
 
-### Running
+2. Install dependencies:
 ```bash
-# Start server
+npm install
+```
+
+3. Set up environment variables:
+```bash
+cp .env.example .env
+```
+
+4. Edit `.env` and add your Akoya credentials:
+```
+CLIENT_ID=your_akoya_client_id
+CLIENT_SECRET=your_akoya_client_secret
+REDIRECT_URI=http://localhost:3000/callback
+```
+
+## Development
+
+Start the server:
+```bash
 node server.js
 ```
 
-### Testing
-1. Visit `http://localhost:3000`
-2. Click "Connect to Bank"
-3. Login with test credentials:
-   ```
-   Username: mikomo_14
-   Password: mikomo_14
-   ```
+The application will be available at `http://localhost:3000`
 
-## Features
-- OAuth2 authentication flow
-- Basic token management
-- Available endpoints:
-  - Account Information
-  - Balances
-  - Investments
-  - Transactions
-  - Customer Information
+## Testing
 
-## Project Structure
+Run tests:
+```bash
+npm test
 ```
-├── server.js              # Express server & proxy
-├── public/
-│   ├── index.html        # OAuth flow page
-│   └── products.html     # Data display
-├── .env                  # Credentials (not in repo)
-├── .env.example          # Environment template
-└── package.json          # Dependencies
-```
+
+Test configuration is in:
+- `jest.config.js` - Jest settings
+- `test-config/setup.js` - Test environment setup
+- `__tests__/*.test.js` - Test files
+- `.env.test` - Test environment variables
 
 ## Security Notes
-- Never commit `.env`
+- Never commit `.env` files to the repository
 - Keep credentials secure
 - Don't expose secrets to frontend
 - Ensure Redirect URIs match exactly between app config and .env
@@ -97,8 +109,4 @@ node server.js
 
 MIT License - Copyright (c) 2024
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-**THE SOFTWARE IS PROVIDED "AS IS"**, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+See LICENSE file for full details.

@@ -1,11 +1,17 @@
-
+// server.js
+require('dotenv').config();
 const express = require('express');
 const fetch = require('node-fetch');
 const app = express();
-const port = 3000;
 
-const dotenv = require('dotenv');
-dotenv.config();
+// Make sure we have required environment variables
+const requiredEnvVars = ['CLIENT_ID', 'CLIENT_SECRET', 'REDIRECT_URI'];
+const missingEnvVars = requiredEnvVars.filter(key => !process.env[key]);
+
+if (missingEnvVars.length > 0) {
+    throw new Error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
+}
+
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI;
@@ -68,25 +74,18 @@ app.get('/api/auth', (req, res) => {
 });
 
 
-app.get('/api/proxy/*', async (req, res) => {
+app.all('/api/proxy/:akoyaPath(*)', async (req, res) => {
     try {
-        const akoyaPath = req.url.replace('/api/proxy/', '');
-        console.log('akoyaPath:', akoyaPath);
-
-
         const token = req.headers.authorization?.split(' ')[1];
-        console.log('token:', token);
-        
         if (!token) {
             return res.status(401).json({ error: 'No token provided' });
         }
 
-        // Get the path after /proxy/
-        
+        const akoyaPath = req.params.akoyaPath;
         const url = `${AKOYA_BASE_URL}/${akoyaPath}`;
         
         console.log('Proxying request to:', url);
-        console.log('Token:', token.substring(0, 10) + '...');
+        console.log('With token:', token.substring(0, 10) + '...');
 
         const response = await fetch(url, {
             method: req.method,
@@ -97,7 +96,16 @@ app.get('/api/proxy/*', async (req, res) => {
         });
 
         const data = await response.json();
-        console.log('Response status:', response.status);
+
+        // If Akoya returns an error status
+        if (!response.ok) {
+            return res.status(500).json({
+                error: data.message || 'Error from Akoya API',
+                code: data.code,
+                original_status: response.status
+            });
+        }
+
         res.json(data);
     } catch (error) {
         console.error('Proxy error:', error);
@@ -105,7 +113,10 @@ app.get('/api/proxy/*', async (req, res) => {
     }
 });
 
-
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-});
+module.exports = app;
+// Only listen if this file is run directly (not required as a module)
+if (require.main === module) {
+    app.listen(3000, () => {
+        console.log('Server is running on port 3000');
+    });
+}
